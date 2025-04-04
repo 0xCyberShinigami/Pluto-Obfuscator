@@ -1,0 +1,36 @@
+name: ollvm build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  Ubuntu:
+    # Specify Ubuntu 22.04 to ensure compatibility with older systems
+    runs-on: ubuntu-22.04
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install toolchain
+      run: sudo apt install -y clang-14 libz3-dev cmake ninja-build
+    
+    - name: Update git submodules
+      run: git submodule update --init
+    
+    - name: Execute build script
+      run: ./build.sh -j8
+    
+    - name: Compress build output
+      run: tar -czvf LLVM14.0.6.tar.gz install
+    
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4.3.3
+      with:
+        name: LLVM14.0.6.tar.gz
+        path: LLVM14.0.6.tar.gz
